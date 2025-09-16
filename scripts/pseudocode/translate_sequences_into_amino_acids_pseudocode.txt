@@ -1,0 +1,22 @@
+Script of Choice: Translate sequences into amino acids for alignment.
+
+
+Description: The script will follow the process of transforming DNA to amino acids by first
+converting DNA to mRNA, and then mRNA into amino acids. The function will take in a list of DNA sequences as input and output an array/list of amino acids as output.
+
+Input:
+*DNA ORFs: List[SeqRecords]
+- The script will take in a list of DNA open reading frames
+
+Output:
+*Amino Acids: List[Seq Object]
+- The script will output a list of amino acids obtained from the DNA input
+
+
+The script will have a shebang line at the beginning to indicate what interpreter to use in executing it.
+
+The script will have a function header with appropriate function and input names. The script's function headers will also utilize type hints for error-handling and informative purposes.
+
+The script will utilize Biopython's translate function to turn nucleotide sequences into protein sequences. The script will iterate through each SeqRecord in the input list and obtain the record's DNA sequence, then use the translate() function to transform the DNA sequence into a protein sequence. The script will take advantage of list comprehension to create a list of amino acids.
+
+The script will return the list of amino acids

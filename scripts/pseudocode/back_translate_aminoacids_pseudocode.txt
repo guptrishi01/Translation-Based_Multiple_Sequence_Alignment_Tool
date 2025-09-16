@@ -1,0 +1,22 @@
+Script of Choice: Back-translate amino acid alignments into codon-aware nucleotide alignments.
+
+Description: The script will follow the process of back translation and when given a list of amino acid alignments and unaligned nucleotide sequences, it translates it into a codon-aware nucleotide alignment
+
+Input:
+*ORFs: List[SeqRecord]
+- The script take in a list of ORFs obtained from DNA sequence
+*Amino Acids: List[Seq Object]
+- The script will take in an amino acid list after progressive alignment
+
+Output:
+*Nucleotides: FASTA
+- The script will output a list representing codon-aware nucleotides
+
+
+The script will have a shebang line at the beginning to indicate what interpreter to use in executing it.
+
+The script will have a function header with appropriate function and input names. The script's function headers will also utilize type hints for error-handling and informative purposes.
+
+The script will iterate through each aligned amino acid and retrieve the original codon from the source ORF. The script will insert a codon-sized gap in the nucleotide alignment if a gap is present in the amino acid alignment. The script will write all of this into a file.
+
+The script will output a FASTA file for the nucleotide alignment.

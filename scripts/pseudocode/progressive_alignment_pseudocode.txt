@@ -1,0 +1,21 @@
+Script of Choice: Using k-mer similarity to sort sequences for progressive alignment
+
+Input:
+*Aligments: List [PairwiseAligner Objects]
+- The script will take in a list of pairwise alignments from the Needleman Wunsch Alignments Script
+
+Output:
+*Progressive Alignment: List[String]
+- The script will output the progressive alignment in the form of a 2D list
+
+The script will have a shebang line at the beginning to indicate what interpreter to use in executing it.
+
+The script will import BioPython in order to use that package's functions. 
+
+The script will have a function header with appropriate function and input names. The script's function headers will also utilize type hints for error-handling and informative purposes.
+
+The script will create a similarity matrix out of the input pairwise alignments, and then create a grid tree out of that matrix.
+
+The script will use the guide tree to create a progressive alignment of the sequences.
+
+The script will return a list of the progressive alignment.

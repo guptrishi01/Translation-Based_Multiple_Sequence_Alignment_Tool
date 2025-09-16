@@ -1,0 +1,22 @@
+Script of Choice: Perform pairwise alignment with the Needleman-Wunsch algorithm
+
+
+Description: The script will follow the process outlined by the Needleman-Wunsch algorithm to perform pairwise alignment on the input FASTA file and output a matrix.
+
+Input:
+*Amino Acids: List[Seq]
+- The script will take in a list of amino acid objects 
+
+Output:
+*Aligner_List: List[PairwiseAlignments]
+- The script will return a list of PairwiseAlignments objects (iterator over the alignments found)
+
+The script will have a shebang line at the beginning to indicate what interpreter to use in executing it.
+
+The script will import BioPython to get access to its DNA parser and alignment functions.
+
+The script will have a function header with appropriate function and input names. The script's function headers will also utilize type hints for error-handling and informative purposes.
+
+The script will utilize BioPython's PairwiseAligner class to perform global alignments using the Needleman-Wunsch algorithm on the list of amino acids. The script will run this alignment inside a for loop so that each sequence is aligned with each other.
+
+The script will output the list of alignments.

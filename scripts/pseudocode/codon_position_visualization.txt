@@ -1,0 +1,21 @@
+Script of Choice: Generate codon position statistics and visualizations.
+
+Description: The script will output the variability of codon positions into a CSV file
+
+Input:
+*Nucleotides: FASTA
+- The script will take in a FASTA file representing the codon-aware nucleotide alignment
+
+Output:
+*Statistics: File
+- The script will output the variability statistics to a CSV file
+
+The script will have a shebang line at the beginning to indicate what interpreter to use in executing it.
+
+The script will have a function header with appropriate function and input names. The script's function headers will also utilize type hints for error-handling and informative purposes.
+
+The script will extract the first, second, and third nucleotide positions across sequences for each codon column in the alignment.
+
+The script will compute percent identity at each codon position and write it to a file.
+
+The script will close the file.
