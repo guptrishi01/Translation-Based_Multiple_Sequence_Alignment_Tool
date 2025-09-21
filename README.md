@@ -16,7 +16,7 @@ The pipeline includes these functionalities:
 ## Usage
 
 ## Repository structure
-msaligner_final_project/  
+final-project-Rishi_Gupta/  
 ├── README.md  
 ├── LICENSE  
 ├── pseudocode.txt  
