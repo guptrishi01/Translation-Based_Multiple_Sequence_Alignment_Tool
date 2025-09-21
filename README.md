@@ -16,40 +16,40 @@ The pipeline includes these functionalities:
 ## Usage
 
 ## Repository structure
-msaligner_final_project/
-├── README.md
-├── LICENSE
-├── pseudocode.txt
-├── run_pipeline.sh
-│
-├── src/
-│   └── msaligner/
-│       ├── __init__.py
-│       ├── cli.py
-│       ├── io_utils.py
-│       ├── orf.py
-│       ├── translate.py
-│       ├── kmers.py
-│       ├── align.py
-│       ├── backtranslate.py
-│       ├── statistics.py
-│       └── plots.py
-│
-├── tests/
-│   ├── test_io_utils.py
-│   ├── test_orf.py
-│   ├── test_translate.py
-│   ├── test_align.py
-│   └── test_statistics.py
-│
-├── data/
-│   └── example.fasta
-│
-├── results/
-│   ├── aligned_proteins.fasta
-│   ├── aligned_codons.fasta
-│   ├── codon_stats.csv
-│   └── codon_variability.png
-│
-└── docs/
-    └── FAIR_checklist.md
+msaligner_final_project/  
+├── README.md  
+├── LICENSE  
+├── pseudocode.txt  
+├── run_pipeline.sh  
+│  
+├── src/  
+│   └── msaligner/  
+│       ├── __init__.py  
+│       ├── cli.py  
+│       ├── io_utils.py  
+│       ├── orf.py  
+│       ├── translate.py  
+│       ├── kmers.py  
+│       ├── align.py  
+│       ├── backtranslate.py  
+│       ├── statistics.py  
+│       └── plots.py  
+│  
+├── tests/  
+│   ├── test_io_utils.py  
+│   ├── test_orf.py  
+│   ├── test_translate.py  
+│   ├── test_align.py  
+│   └── test_statistics.py  
+│  
+├── data/  
+│   └── example.fasta  
+│  
+├── results/  
+│   ├── aligned_proteins.fasta  
+│   ├── aligned_codons.fasta  
+│   ├── codon_stats.csv  
+│   └── codon_variability.png  
+│  
+└── docs/  
+    └── FAIR_checklist.md  
