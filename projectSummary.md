@@ -1,11 +1,15 @@
-### Project Summary
+# Project Summary
 
 ## Project Goals
-# The goal of this project is to create a MSA pipeline that reads in raw FASTA data and performs a variety of operations to generate codon position statistics and visualizations.
-# Once the project is completed, the student will deliver a professional industry-style project demo.
+The goal of this project is to design and implement a multiple sequence alignment (MSA) pipeline in Python that reads in raw FASTA data and performs a variety of operations to generate codon position statistics and visualizations.
 
 ## Final Deliverables
-# The deliverable of this project is a Python package with executable Python code, reproducible output, and unit testing.
+1. Python package with core modules: ORF detection, translation, k-mer similarity, Needleman-Wunsch alignment, back-translation, codon statistics and plotting.
+2. Command-Line Interface
+3. Documentation
+4. Unit Tests
+5. Outputs: Aligned amino acid and nucleotide FASTA files, codon position statistics in CSV format, codon variability plot
+6. Final Report & Presentation
 
 ## Project Vision
-# The vision of this project is to create and present bioinformatics software that can be used in the industry. The code itself should tackle real-world issues and helps in advancing today's society.
+The vision of this project is to not be seen as a course project, but rather as a professional bioinformatics software project to be used in the industry. The project's broader vision is to demonstrate careful design, good coding practices, and FAIR data principles can make bioinformatics pipelines robust, transparent, and useful in real-world scientific research.
