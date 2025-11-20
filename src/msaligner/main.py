@@ -16,9 +16,28 @@ import argparse, sys
 from orf import find_orfs
 from translate_to_AA import protein_translate
 
+class msaligner:
+    def __init__(self, fasta: str):
+        self.fasta = fasta
+
+    
+    def find_and_translate_orfs(self):
+         self.df = find_orfs(self.fasta)
+         self.df = protein_translate(self.df)
+
+
+
+    
+
 
 # def get_args():
-# 	"""Parse command-line arguments for grid dimensions."""
+# 	"""
+#     Utilizes Command-Line Interface 
+    
+#     Utilizes functions from other programs detect ORFs, translate sequences
+#     to amino acids, perform pairwise alignment, and back-translate alignments and
+#     generate codon position statistics and visualizations.
+#     """
 # 	parser = argparse.ArgumentParser(
 # 		description="Draw an ASCII grid with customizable dimensions."
 # 	)
@@ -38,10 +57,9 @@ def main():
     to amino acids, perform pairwise alignment, and back-translate alignments and
     generate codon position statistics and visualizations.
     """
-    test_fasta = "fly_dna1.fasta"
-    orfs = find_orfs(test_fasta)
-    print(len(orfs))
-    print(protein_translate(orfs))
+    test_fasta = "test.fasta"
+    aligner = msaligner(test_fasta)
+    aligner.find_and_translate_orfs()
     
 if __name__ == "__main__":
     main()

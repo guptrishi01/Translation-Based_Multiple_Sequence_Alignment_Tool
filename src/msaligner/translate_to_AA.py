@@ -25,11 +25,9 @@ def protein_translate(df: pd.DataFrame, user_table=1) -> pd.DataFrame:
             - 'Amino_Acids' (str): Sequence of amino acids translated from DNA sequence
     """
 
-    amino_acids = []
-    for sequence in df['seq']:
-        rna_seq = Seq(sequence).transcribe()
-        amino_acids.append(rna_seq.translate(table = user_table))
+    """ Transcription and Translation of DNA into Amino Acids based on ordering of sequence """
+    df['Amino_Acids'] = [ Seq(row.orf).transcribe().translate(table = user_table) if row.reverse == True 
+                   else (Seq(row.orf).reverse_complement().transcribe().translate(table = user_table)) 
+                   for row in df.itertuples(index=False) ]
     
-    df['Amino_Acids'] = amino_acids
-
     return df
