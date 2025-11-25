@@ -1,41 +1,62 @@
 #!/usr/bin/env python3
 
 """
-This program generates a list of open reading frames obtained from the DNA sequences 
-of  a FASTA file.
+This program generates a distance matrix of amino acid ORF sequences sorted by k-mer similarity
 
 Author: Rishi Gupta
 Contact: rgupta25@charlotte.edu
 
 """
 
+import pandas as pd
+import numpy as np
 from Bio import SeqIO
-from Bio.SeqUtils import orf
+import math
+from itertools import combinations
 
-def find_orfs(fasta: str, min_length: int = 100) -> list[dict]:
+def kmer_similarity(df: pd.DataFrame, length=4) -> list:
     """
-    Find all open reading frames (ORFs) in a nucleotide sequence on a given strand.
-
+    Create a distance matrix to order amino acid sequences by k-mer similarity
     Args:
-        fasta (str): The FASTA file entered by the user on the command line
-        min_length (int): The minimum number of nucleotides in the ORF (the default is 100).
+        df (pd.DataFrame): Pandas DataFrame containing amino acid ORF sequences
+        length (int): The length of k-mers specified by user (default is 4)
 
     Returns:
-        list[dict]: A list of ORFs, where each ORF is represented as a dictionary containing:
-            - 'start' (int): Start position (0-based index).
-            - 'end' (int): End position (exclusive).
-            - 'frame' (int): Reading frame (0, 1, or 2).
-            - 'strand' (str): '+' or '-'.
-            - 'sequence' (str): The ORF nucleotide sequence.
+        list: List containing order of sequences
     """
-    # Create 
-    # Use try-except statement to use SeqIO.parse() to read in FASTA file and create iterator
-    try:
-        sequence_records = SeqIO.parse(fasta, "fasta")
-    except FileNotFoundError:
-        raise("Error: The file entered could not be found")
+
+    """ Dictionary for Amino Acids """
+    kmer_array = {}
     
-    # Go through iterator using a for loop and find orf
-    # Create entry and add it into a list containing start, end, sequence
+    """ Lists that will contain kmers for similarity calculations """
+
+    # Generate all unique two-digit combinations
+    two_digit_combinations = list(combinations(range(len(df['Amino_Acids'])), 2))
+    # Go through each combination and calculate Mash Distance of sequences
+    for combination in two_digit_combinations:
+        kmer_array[(combination[0],combination[1])] = index_and_distance(df['Amino_Acids'][combination[0]],df['Amino_Acids'][combination[1]] ,length)
+    
+    # Sort the dictionary by ascending Mash Distance values
+    keys, values = dict(sorted(kmer_array.items(), key=lambda item: item[1]))
+    # Return pairs of sequences to be aligned based on similarity (most to least)
+    return keys
 
 
+
+# ATGAGAGAGAGA
+## [ATG, TGA, GAG, ..., AGA]
+## Do this for a pair of sequences 
+## For kmer in list of kmers in seq 1 if kmer in list of kmers in seq2 count ++
+## Find the common k-mers (How many k-mers they have in common - an integer like 55) - dictates similarity
+### More kmers they share - more similar they are
+### Do that for all your sequences and keep track of scores
+## Whatevers your most similar gets aligned first, and you follow the scores
+
+def index_and_distance(seq1 : str, seq2: str, length: int) -> float:
+    kmers_1 = [seq1[i: i + length] for i in range(len(seq1) - length + 1)]
+    kmers_2 = [seq2[i: i + length] for i in range(len(seq2) - length + 1)]
+    jaccard = len(set(kmers_1) & set(kmers_2)) / len(set(kmers_1) | set(kmers_2))
+    # No k-mers found - sequences are completely different
+    if jaccard == 0:
+        return 1
+    return float((-1 / length) * math.log((2 * jaccard) / (1 + jaccard)))

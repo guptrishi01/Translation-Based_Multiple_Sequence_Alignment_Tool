@@ -8,13 +8,33 @@ Author: Rishi Gupta
 Contact: rgupta25@charlotte.edu
 
 """
-
+from Bio.Seq import Seq
 from Bio import SeqIO
 import pandas as pd
 import sys
 
-# Method to find longest ORF of a sequence
-# Method to go through each sequence of a FASTA file and return pandas Dataframe
+
+def protein_translate(df: pd.DataFrame, user_table=1) -> pd.DataFrame:
+    """
+    Read in DataFrame containing Open Reading Frames and transcribe
+    nucleotide sequences to RNA, then RNA sequences to amino acids
+
+    Args:
+        df (pd.DataFrame): The Pandas DataFrame containing Open Reading Frames and their DNA sequences
+        user_table (int): The user's choice for translation table (default choice is 1)
+    
+    Returns:
+        pd.DataFrame: An updated Pandas DataFrame with a new column
+            - 'Amino_Acids' (str): Sequence of amino acids translated from DNA sequence
+    """
+
+    """ Transcription and Translation of DNA into Amino Acids based on ordering of sequence """
+    # Forward direction (5' - 3') is normal transcription and translation, Reverse direction (3' - 5') needs to be reverse complemented to forward
+    df['Amino_Acids'] = [ Seq(row.orf).reverse_complement().transcribe().translate(table = user_table) if row.reverse == True 
+                   else (Seq(row.orf).transcribe().translate(table = user_table)) 
+                   for row in df.itertuples(index=False) ]
+    
+    return df
 
 def find_orfs(fasta: str) -> pd.DataFrame:
     """
@@ -73,13 +93,15 @@ def find_longest_orf(seq: str) -> pd.Series:
     }
 
     """ Forward and Reverse Strand """
-    for nucleotide in [seq, seq[::-1]]:
+    for nucleotide in [seq ,seq.reverse_complement()]:
         """ Reading frames 0, 1, 2 """
         for frame in range(3):
             """ Go through whole sequence """
+            i = frame
             for i in range(frame, len(nucleotide) - 2, 3):
                 """ If a start codon is found - go through rest of sequence for stop codon """
                 if nucleotide[i:i + 3] == "ATG":
+                    # If another start codon is found in an existing ORF, skip it
                     for j in range(i + 3, len(nucleotide) - 2, 3):
                         """ Add reading frame into FASTA dictionary if stop codon is found """
                         if nucleotide[j:j + 3] in stop_codon:
@@ -89,9 +111,6 @@ def find_longest_orf(seq: str) -> pd.Series:
                             fasta_dict["frame"].append(frame)
                             fasta_dict["reverse"].append(True if nucleotide != seq else False)
                             break # Found ORF, break out of for loop
-                       
-    # Consider instances where there are ties
+    pd.DataFrame(fasta_dict).to_csv('output.csv')
     """ Sort Dictionary to where longest ORF is at top """
     return pd.DataFrame(fasta_dict).sort_values(by='orf', key=lambda x: x.str.len(), ascending=False)
-
-    

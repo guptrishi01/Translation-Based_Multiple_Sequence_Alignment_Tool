@@ -1,7 +1,15 @@
 # Programming II Final Project
-# Author: Rishi Gupta
+## Author: Rishi Gupta
+## Email: guptrishi01@gmail.com
 
-## Project Overview
+## Table of Contents
+- Brief Description
+- Installation Instructions
+- Usage
+- Project Repository Structure
+- License
+
+### Project Overview
 This project is a **Translation-Based Multiple Sequence Aligner (MSA)** pipeline written in Python.
 It aligns nucleotides by translating them into amino acids, pairwise aligning at the protein level, and then back-translating to codon-aware nucleotide alignments.
 
@@ -13,9 +21,17 @@ The pipeline includes these functionalities:
 5. **Back-Translation** – Convert aligned amino acids into codon-aware nucleotide alignments.  
 6. **Codon Statistics & Visualization** – Generate CSV summaries and plots of codon position variability.
 
-## Usage
 
-## Repository structure
+### Installation Instructions
+
+Clone the Github repository by entering the following in the command terminal in your desired repository:
+
+git clone https://github.com/guptrishi01/final-project-Rishi_Gupta.git
+
+### Usage
+
+
+### Project Repository Structure
 final-project-Rishi_Gupta/  
 ├── README.md  
 ├── LICENSE  
@@ -52,4 +68,8 @@ final-project-Rishi_Gupta/
 │   └── codon_variability.png  
 │  
 └── docs/  
-    └── FAIR_checklist.md  
+    └── FAIR_checklist
+
+### License
+
+This project operates under the GPL-2.0 license

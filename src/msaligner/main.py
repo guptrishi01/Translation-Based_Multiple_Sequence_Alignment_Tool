@@ -14,18 +14,17 @@ import pandas as pd
 
 import argparse, sys
 from orf import find_orfs
-from translate_to_AA import protein_translate
+from orf import protein_translate
 
-class msaligner:
-    def __init__(self, fasta: str):
-        self.fasta = fasta
+
+# class msaligner:
+#     def __init__(self, fasta: str):
+#         self.fasta = fasta
 
     
-    def find_and_translate_orfs(self):
-         self.df = find_orfs(self.fasta)
-         self.df = protein_translate(self.df)
-
-
+#     def find_and_translate_orfs(self):
+#          self.df = find_orfs(self.fasta)
+#          self.df = protein_translate(self.df)
 
     
 
@@ -58,8 +57,8 @@ def main():
     generate codon position statistics and visualizations.
     """
     test_fasta = "test.fasta"
-    aligner = msaligner(test_fasta)
-    aligner.find_and_translate_orfs()
+    find_orfs(test_fasta)
+    
     
 if __name__ == "__main__":
     main()
