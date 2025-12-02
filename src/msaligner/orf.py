@@ -13,30 +13,7 @@ from Bio import SeqIO
 import pandas as pd
 import sys
 
-
-def protein_translate(df: pd.DataFrame, user_table=1) -> pd.DataFrame:
-    """
-    Read in DataFrame containing Open Reading Frames and transcribe
-    nucleotide sequences to RNA, then RNA sequences to amino acids
-
-    Args:
-        df (pd.DataFrame): The Pandas DataFrame containing Open Reading Frames and their DNA sequences
-        user_table (int): The user's choice for translation table (default choice is 1)
-    
-    Returns:
-        pd.DataFrame: An updated Pandas DataFrame with a new column
-            - 'Amino_Acids' (str): Sequence of amino acids translated from DNA sequence
-    """
-
-    """ Transcription and Translation of DNA into Amino Acids based on ordering of sequence """
-    # Forward direction (5' - 3') is normal transcription and translation, Reverse direction (3' - 5') needs to be reverse complemented to forward
-    df['Amino_Acids'] = [ Seq(row.orf).reverse_complement().transcribe().translate(table = user_table) if row.reverse == True 
-                   else (Seq(row.orf).transcribe().translate(table = user_table)) 
-                   for row in df.itertuples(index=False) ]
-    
-    return df
-
-def find_orfs(fasta: str) -> pd.DataFrame:
+def find_orfs(fasta: str, user_table : int=1) -> pd.DataFrame:
     """
     Find the longest open reading frames (ORFs) for sequences in a FASTA file
 
@@ -56,7 +33,7 @@ def find_orfs(fasta: str) -> pd.DataFrame:
 
     try:
         with open(fasta, "r") as fh:
-            orf_list = [find_longest_orf(record.seq).head(1) for record in SeqIO.parse(fh, "fasta")]
+            orf_list = [find_longest_orf(record.seq, record.id, user_table).head(1) for record in SeqIO.parse(fh, "fasta")]
     except FileNotFoundError:
         sys.stderr.write("FASTA file was not found")
         raise FileNotFoundError
@@ -68,7 +45,7 @@ def find_orfs(fasta: str) -> pd.DataFrame:
         raise Exception
     return pd.concat(orf_list, ignore_index=True)
 
-def find_longest_orf(seq: str) -> pd.Series:
+def find_longest_orf(seq: str, id : str, user_table : int=1) -> pd.Series:
     """
     Find the longest open reading frames (ORF) in a nucleotide sequence on a given strand.
 
@@ -85,11 +62,13 @@ def find_longest_orf(seq: str) -> pd.Series:
 
     """ FASTA dictonary """
     fasta_dict = {
+        "id" : [],
         "start" : [],
         "end" : [],
+        "seq" : [],
         "orf" : [],
         "frame" : [],
-        "reverse" : [],
+        "Amino_Acids" : []
     }
 
     """ Forward and Reverse Strand """
@@ -105,12 +84,13 @@ def find_longest_orf(seq: str) -> pd.Series:
                     for j in range(i + 3, len(nucleotide) - 2, 3):
                         """ Add reading frame into FASTA dictionary if stop codon is found """
                         if nucleotide[j:j + 3] in stop_codon:
+                            fasta_dict["id"].append(id)
                             fasta_dict["start"].append(i)
                             fasta_dict["end"].append(j + 3)
+                            fasta_dict["seq"].append(nucleotide)
                             fasta_dict["orf"].append(nucleotide[i: j + 3])
                             fasta_dict["frame"].append(frame)
-                            fasta_dict["reverse"].append(True if nucleotide != seq else False)
+                            fasta_dict["Amino_Acids"].append(Seq(nucleotide[i: j + 3]).translate(table=user_table))
                             break # Found ORF, break out of for loop
-    pd.DataFrame(fasta_dict).to_csv('output.csv')
     """ Sort Dictionary to where longest ORF is at top """
     return pd.DataFrame(fasta_dict).sort_values(by='orf', key=lambda x: x.str.len(), ascending=False)
