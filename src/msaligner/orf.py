@@ -20,7 +20,7 @@ import sys
 
 class ORFError(Exception):
     """
-    Custom error that is raised due to invalid or missing data
+    Custom error that is raised during ORF detection
     """
     pass
 
@@ -45,21 +45,19 @@ def find_orfs(fasta: str, user_table : int=1) -> pd.DataFrame:
 
     # Reading in FASTA file + Error Handling
 
+    if not isinstance(fasta, str) or not fasta.strip():
+        sys.stderr.write("FASTA path must be a non-empty string")
+        raise ValueError("FASTA path must be a non-empty string")
+
     try:
         with open(fasta, "r") as fh:
             orf_list = [find_longest_orf(record.seq, record.id, user_table).head(1) for record in SeqIO.parse(fh, "fasta")]
-    
     except FileNotFoundError:
         sys.stderr.write("FASTA file was not found")
         raise FileNotFoundError("FASTA file was not found")
-    
     except IOError as e:
         sys.stderr.write(f"An IO error has occurred {e}")
         raise IOError(f"An IO error has occurred {e}")
-    
-    except ORFError:
-        sys.stderr.write(f"Failed to parse FASTA file")
-        raise Exception(f"Failed to parse FASTA file")
     
     if not orf_list:
         sys.stderr.write("FASTA file contained no sequences")
@@ -122,8 +120,9 @@ def find_longest_orf(seq: str, id : str, user_table : int=1) -> pd.DataFrame:
                             fasta_dict["frame"].append(frame)
                             fasta_dict["Amino_Acids"].append(Seq(nucleotide[i: j + 3]).translate(table=user_table))
                             break
-    if not fasta_dict:
+    if len(fasta_dict["orf"]) == 0:
         sys.stderr.write("No ORF was found in sequence")
         raise ORFError("No ORF was found in sequence")
+    
     # Sort dictionary where longest ORF is at top
     return pd.DataFrame(fasta_dict).sort_values(by='orf', key=lambda x: x.str.len(), ascending=False)

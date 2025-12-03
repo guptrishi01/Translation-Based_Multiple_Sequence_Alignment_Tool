@@ -54,6 +54,7 @@ Create conda environment
 conda create --name bioinfo_env pandas numpy biopython matplotlib pytest
 conda activate bioinfo_env
 ```
+---
 
 ## Usage
 
@@ -78,9 +79,47 @@ Options/Arguments:
 - -t, -table (Translation table)
 - -k, -kmer (K-mer size)
 
+---
 
-###
 
+## Input & Output Formats
+### Input FASTA format
+a) Must contain nucleotide sequences  
+b) ORFs must exist in at least one frame  
+
+Example:
+```fasta
+>seq1
+ATGACCTTGAATG...
+>seq2
+ATGGGCTTTAG...
+```
+
+### Output Files
+#### 1. Amino Acid Alignment
+`results/aligned_amino_acids.fasta`
+
+#### 2. DNA Codon Alignment
+`results/dna_codon_alignment.fasta`
+
+#### 3. Codon Statistics
+`results/codon_positions.csv` – Columns:
+- codon_position
+- mismatches
+- total
+- mutation_rate
+
+`results/alignment_stats.csv` – Columns:
+- Position
+- MismatchRate
+- IndelRate
+
+
+#### 4. Codon Variability Plot
+`results/alignment_mutation_rates.png` 
+- Visualizes mismatch and indel rates across alignment
+
+---
 
 ### Project Repository Structure
 final-project-Rishi_Gupta/  
@@ -94,18 +133,18 @@ final-project-Rishi_Gupta/
 │       ├── kmer_ordering.py  
 │       ├── orf.py  
 │       ├── needleman_wunsch.py  
-│       ├── main.py  
-|       └── test.fasta
+|       └── main.py
 │  
 ├── tests/  
-│   ├── test_io_utils.py  
-│   ├── test_orf.py  
-│   ├── test_translate.py  
-│   ├── test_align.py  
-│   └── test_statistics.py  
+│   ├── __init__.py  
+│   ├── conftest.py  
+│   ├── align_test.py  
+│   ├── orf_test.py  
+│   ├── kmer_test.py
+│   └── test_file.fasta   
 │  
 ├── data/  
-│   └── example.fasta  
+│   └── fly_dna1.fasta 
 │  
 ├── results/  
 │   ├── aligned_proteins.fasta  
@@ -114,7 +153,19 @@ final-project-Rishi_Gupta/
 │   └── codon_variability.png  
 │  
 └── docs/  
-    └── FAIR_checklist
+    ├── Project Flowchart
+    ├── Project Pseudocode
+    └── projectSummary
+
+---
+
+## Limitations & Assumptions
+- Pipeline assumes FASTA file sequences are nucleotides sequences.
+- Back-translation maps aligned amino acids to original codons one-to-one.
+- Very large datasets may require further optimization.
+- Code can be optimized to reduce runtime and memory usage
+
+---
 
 ### License
 

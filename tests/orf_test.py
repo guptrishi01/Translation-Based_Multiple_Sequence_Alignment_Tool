@@ -11,6 +11,9 @@ TEST_DIR = Path(__file__).parent
 FASTA = TEST_DIR / "test_file.fasta"
 
 def test_find_longest_orf_basic():
+    """
+    Testing correctness of finding longest ORF
+    """
     seq = Seq("AAAATGAAATAGAAA")
     df = find_longest_orf(seq, "s1")
     assert isinstance(df, pd.DataFrame)
@@ -20,11 +23,17 @@ def test_find_longest_orf_basic():
     assert df.iloc[0]["orf"].endswith(("TAG", "TAA", "TGA"))
 
 def test_find_orfs_missing_file():
+    """
+    Testing correct FileNotFoundError check
+    """
     with pytest.raises(FileNotFoundError):
         find_orfs("no_such_file.fasta")
 
 
 def test_find_orfs_reads_sequences():
+    """
+    Testing parsing of FASTA to create ORFs
+    """
     assert FASTA.exists(), f"Test FASTA not found at {FASTA}"
 
     df = find_orfs(str(FASTA))
@@ -33,12 +42,4 @@ def test_find_orfs_reads_sequences():
     assert "orf" in df.columns
     assert "Amino_Acids" in df.columns
     assert len(df) > 0
-
-
-def test_ensure_longest_orf():
-    assert FASTA.exists(), f"Test FASTA not found at {FASTA}"
-
-    seqs = list(SeqIO.parse(str(FASTA), "fasta"))
-    assert len(seqs) >= 1
-    assert all(len(str(record.seq)) > 0 for record in seqs)
 

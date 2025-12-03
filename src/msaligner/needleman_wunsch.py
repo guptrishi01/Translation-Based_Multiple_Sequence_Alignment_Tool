@@ -30,8 +30,8 @@ def init_mat(seq1: np.ndarray, seq2: np.ndarray) -> np.ndarray:
 	"""
 	
 	if not isinstance(seq1, np.ndarray) or not isinstance(seq2, np.ndarray):
-		sys.stderr.write("seq1 and seq2 must be numpy arrays.")
-		raise ValueError("seq1 and seq2 must be numpy arrays.")
+		sys.stderr.write("Sequences for alignment must be numpy arrays")
+		raise ValueError("Sequences for alignment must be numpy arrays")
 
 	rows = len(seq2) + 1
 	cols = len(seq1) + 1
@@ -66,11 +66,14 @@ def fill_matrix(
 		(np.ndarray) : Scoring matrix filled via Needleman-Wunsch
 
 	"""
-
+	if not all(isinstance(x, int) for x in (match, mismatch, indel)):
+		sys.stderr.write("match, mismatch, and indel must be integers.")
+		raise TypeError("match, mismatch, and indel must be integers")
+	
 	rows, cols = matrix.shape
 	if matrix.shape != (len(seq2_array) + 1, len(seq1_array) + 1):
-		sys.stderr.write("Matrix shape does not match sequence lengths.")
-		raise ValueError("Matrix shape does not match sequence lengths.")
+		sys.stderr.write("Matrix shape does not match sequence lengths")
+		raise ValueError("Matrix shape does not match sequence lengths")
 
 
 	# Initialize the first row and first column with indel penalties
@@ -116,6 +119,9 @@ def trace_matrix(
 		(np.ndarray) : A NumPy array with alignments of sequence 1 and 2:
 
 	"""
+	if matrix.size == 0:
+		sys.stderr.write("Cannot trace back an empty matrix")
+		raise ValueError("Cannot trace back an empty matrix")
 	i, j = matrix.shape[0] - 1, matrix.shape[1] - 1
 	aligned_seq1 = []
 	aligned_seq2 = []

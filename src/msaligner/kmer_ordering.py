@@ -72,6 +72,9 @@ def get_kmers(seq : str, k : int = 3) -> list:
         (list) : List of k-mers from sequence
     """
 
+    if not isinstance(k, int):
+        raise TypeError("K-mer size must be an integer.")
+
     if k < 1:
         sys.stderr.write("k must be a positive integer")
         raise ValueError("k must be a positive integer")
@@ -142,8 +145,11 @@ def order_by_kmer_similarity(kmer_dict: dict) -> list:
     names = list(kmer_dict.keys())
     n = len(names)
 
-    # If there is one sequence, return it
-    if n <= 1:
+    # If there is one sequence, return it; else it's an error
+    if n == 0:
+        sys.stderr.write("K-mer dict ")
+        raise ValueError("K-mer dict is empty - no sequences available for ordering")
+    if n == 1:
         return names
 
     # Compute Jaccard similarities for each sequence pairing

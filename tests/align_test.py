@@ -6,6 +6,9 @@ import numpy as np
 from msaligner.needleman_wunsch import init_mat, fill_matrix, trace_matrix
 
 def test_init_mat_basic():
+    """
+    Testing initialization of matrix
+    """
     s1 = np.array(list("ABC"))
     s2 = np.array(list("XYZ"))
     m = init_mat(s1, s2)
@@ -13,6 +16,9 @@ def test_init_mat_basic():
     assert np.all(m == 0)
 
 def test_fill_matrix_basic():
+    """
+    Testing the correctness of filling a matrix
+    """
     s1 = np.array(list("GATT"))
     s2 = np.array(list("GCT"))
     m = init_mat(s1, s2)
@@ -24,6 +30,9 @@ def test_fill_matrix_basic():
 
 
 def test_trace_simple_alignment():
+    """
+    Testing the tracing of matrix
+    """
     s1 = np.array(list("GATTACA"))
     s2 = np.array(list("GCATGCU"))
 
@@ -34,6 +43,9 @@ def test_trace_simple_alignment():
     assert len(aln[0]) == len(aln[1])
 
 def test_trace_matrix_correctness():
+    """
+    Testing correctness of tracing a matrix
+    """
     s1 = np.array(list("AA"))
     s2 = np.array(list("A"))
 

@@ -25,6 +25,7 @@ import numpy as np
 import argparse, sys
 import os
 from typing import List, Dict
+from pathlib import Path
 import matplotlib.pyplot as plt
 
 from orf import find_orfs
@@ -35,6 +36,8 @@ from needleman_wunsch import init_mat
 from needleman_wunsch import fill_matrix
 from needleman_wunsch import trace_matrix
 
+# Project Root and Output Directory Path
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 OUTPUT_DIR = "results"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -46,12 +49,12 @@ def parse_args() -> argparse.Namespace:
 	)
 	parser.add_argument(
 		"-i", "--input",
-		default="test.fasta",
+		default="fly_dna1.fasta",
 		help="Path to input FASTA file."
 	)
 	parser.add_argument(
 		"-o", "--output",
-		default="alignment.fasta",
+		default="aligned_amino_acids.fasta",
 		help="Path to output FASTA alignment file."
 	)
 	parser.add_argument(
@@ -386,6 +389,7 @@ class MSAligner:
 		out_png = os.path.join(OUTPUT_DIR, "alignment_mutation_rates.png")
 		plt.savefig(out_png, dpi=140)
 		plt.show()
+		plt.close()
 
 	
 
@@ -393,7 +397,7 @@ class MSAligner:
 		"""
 		Write final aligned amino-acid and DNA sequences to FASTA format
 		"""
-		dna_path = os.path.join(OUTPUT_DIR, "dna_alignment.fasta")
+		dna_path = os.path.join(OUTPUT_DIR, "dna_codon_alignment.fasta")
 		aa_path = os.path.join(OUTPUT_DIR, self.out)
 
 
@@ -427,7 +431,7 @@ class MSAligner:
 				f.write(f">{seq_id}_codon\n{codon_seq}\n")
 				sys.stdout.write(f">{seq_id}_codon\n{codon_seq}\n")
 
-		sys.stdout.write(f"Alignment saved into codon_alignment.fasta\n//\n")
+		sys.stdout.write(f"Alignment saved into dna_codon_alignment.fasta\n//\n")
 
 
 def main():
@@ -437,8 +441,11 @@ def main():
 	generate codon position statistics and visualizations.
 	"""
 	args = parse_args()
+	FASTA = PROJECT_ROOT / "data" / args.input
+	print(FASTA)
+	print(args.input)
 	msaligner = MSAligner(
-		fasta_file=args.input,
+		fasta_file=FASTA,
 		aln_file=args.output,
 		ref=args.reference,
 		match=args.match,
