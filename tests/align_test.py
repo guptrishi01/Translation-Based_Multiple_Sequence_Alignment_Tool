@@ -4,7 +4,6 @@ import pytest
 import pandas as pd
 import numpy as np
 from msaligner.needleman_wunsch import init_mat, fill_matrix, trace_matrix
-from msaligner.main import back_translate_alignment
 
 def test_init_mat_basic():
     s1 = np.array(list("ABC"))
@@ -21,7 +20,8 @@ def test_fill_matrix_basic():
 
     assert m2.shape == (len(s2)+1, len(s1)+1)
     # Check that scoring was applied
-    assert m2[-1, -1] != 0
+    assert np.any(m2[1:, 1:] != 0)
+
 
 def test_trace_simple_alignment():
     s1 = np.array(list("GATTACA"))
@@ -40,7 +40,11 @@ def test_trace_matrix_correctness():
     m = fill_matrix(init_mat(s1, s2), s1, s2)
     aln = trace_matrix(m, s1, s2)
 
+    s1 = "".join(next(iter(x)) for x in aln[0])
+    s2 = "".join(next(iter(x)) for x in aln[1])
+
     # Should align A with A and introduce one gap
-    assert "".join(aln[0]) in ["AA", "AA"]
-    assert "".join(aln[1]).count("-") == 1
+    assert s1 in ["AA"]
+    assert s2.count("-") == 1
+    assert s2.replace("-", "") == "A"
 

@@ -27,7 +27,6 @@ import os
 from typing import List, Dict
 import matplotlib.pyplot as plt
 
-from matplotlib.colors import LinearSegmentedColormap
 from orf import find_orfs
 from kmer_ordering import dataframe_to_dict
 from kmer_ordering import order_by_kmer_similarity
@@ -386,7 +385,7 @@ class MSAligner:
 
 		out_png = os.path.join(OUTPUT_DIR, "alignment_mutation_rates.png")
 		plt.savefig(out_png, dpi=140)
-		plt.close()
+		plt.show()
 
 	
 

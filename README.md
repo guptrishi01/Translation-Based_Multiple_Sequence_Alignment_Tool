@@ -32,11 +32,11 @@ The pipeline includes these functionalities:
 ---
 
 ## AI Usage Statement
-I used AI (ChatGPT) **as an assistant, not a code generator**. AI helped in these ways:
+I used AI (ChatGPT) **as an assistant, not a code generator**. I used ChatGPT in these ways:
 
-- Reviewing code structure and identifying logical inconsistencies.
-- Suggesting docstring improvements and clarifying function behavior.
-- Helping debug algorithmic issues in the alignment and back-translation steps.
+- Debugging
+- Clarifying biological concepts
+- Suggesting methods to increase code efficiency
 
 **No code was copied verbatim.** All final implementations were manually written, tested, and adapted for the project’s requirements.
 
@@ -51,41 +51,51 @@ cd final-project_Rishi_Gupta/src/msaligner
 
 Create conda environment
 ```bash
-pip install -r requirements.txt
+conda create --name bioinfo_env pandas numpy biopython matplotlib pytest
+conda activate bioinfo_env
 ```
 
-Make the pipeline executable:
+## Usage
+
 ```bash
-chmod +x run_pipeline.sh
+python3 main.py <options>
 ```
 
-Run the full pipeline:
+To see the available options:
+
 ```bash
-./run_pipeline.sh data/example.fasta
+python3 main.py -h
 ```
 
----
+Options/Arguments:
+- -h, --help (Help message)
+- -i, --input (Path to input FASTA file)
+- -o, --output (Path to output FASTA alignment file)
+- -r, --reference (Sequence ID to use as a reference for mutation-rate analysis)
+- -ma, -match (Score for a match)
+- -mi, -mismatch (Penalty for a mismatch)
+- -in, -indel (Penalty for an insertion/deletion)
+- -t, -table (Translation table)
+- -k, -kmer (K-mer size)
+
+
+###
 
 
 ### Project Repository Structure
 final-project-Rishi_Gupta/  
 ├── README.md  
-├── LICENSE  
-├── pseudocode.txt  
-├── run_pipeline.sh  
+├── LICENSE   
 │  
 ├── src/  
 │   └── msaligner/  
 │       ├── __init__.py  
-│       ├── cli.py  
-│       ├── io_utils.py  
+│       ├── back_translate.py  
+│       ├── kmer_ordering.py  
 │       ├── orf.py  
-│       ├── translate.py  
-│       ├── kmers.py  
-│       ├── align.py  
-│       ├── backtranslate.py  
-│       ├── statistics.py  
-│       └── plots.py  
+│       ├── needleman_wunsch.py  
+│       ├── main.py  
+|       └── test.fasta
 │  
 ├── tests/  
 │   ├── test_io_utils.py  

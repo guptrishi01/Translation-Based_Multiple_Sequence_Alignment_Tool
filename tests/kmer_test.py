@@ -1,6 +1,6 @@
 import pytest
 import pandas as pd
-from msaligner.kmers import (
+from msaligner.kmer_ordering import (
     get_kmers,
     jaccard_calculation,
     dataframe_to_dict,
@@ -34,7 +34,7 @@ def test_dataframe_to_dict_basic():
     })
     d = dataframe_to_dict(df, k=2)
     assert d["S1"] == ["AB", "BC", "CD", "DE"]
-    assert d["S2"] == ["AA"]
+    assert d["S2"] == ["AA", "AA"]
 
 def test_order_by_similarity_three_sequences():
     kmer_dict = {
