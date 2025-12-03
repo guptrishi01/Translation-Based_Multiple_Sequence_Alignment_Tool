@@ -1,20 +1,45 @@
 #!/usr/bin/env python3
 
 """
-This program generates a list of open reading frames obtained from the DNA sequences 
-of  a FASTA file.
+This module provides functions for simulating the Needleman Wunsch Algorithm
+for two sequences.
 
-Author: Rishi Gupta
-Contact: rgupta25@charlotte.edu
+It includes functions for initializing the matrix, filling it out via Needleman Wunsch,
+and tracing it back to find the optimal alignment. The goal is align each pairing of sequences
+for back-translation and statistic + visualizations.
 
+Functions:
+	- init_mat(seq1, seq2) - Initializes matrix for two sequences
+	- fill_matrix(matrix, seq1_array, seq2_array, match, mismatch, indel) - Fills out matrix for two sequences based on Needleman-Wunsch algorithm
+	- trace_matrix(matrix, seq1_array, seq2_array) - Finds optimal alignment of two sequences from filled out matrix
 """
 
 import numpy as np
-import pandas as pd
+import sys
 
 def init_mat(seq1: np.ndarray, seq2: np.ndarray) -> np.ndarray:
+	"""
+	Initialize the Needleman-Wunsch scoring matrix
+
+	Args:
+		seq1 (np.ndarray) : NumPy array of characters representing sequence 1
+		seq2 (np.ndarray) : NumPy array of characters representing sequence 2
+
+	Returns:
+		(np.ndarray) : Zero-initialized matrix for filling and tracing
+	"""
+	
+	if not isinstance(seq1, np.ndarray) or not isinstance(seq2, np.ndarray):
+		sys.stderr.write("seq1 and seq2 must be numpy arrays.")
+		raise ValueError("seq1 and seq2 must be numpy arrays.")
+
 	rows = len(seq2) + 1
 	cols = len(seq1) + 1
+
+	if rows <= 1 or cols <= 1:
+		sys.stderr.write("Sequences must contain at least one element.")
+		raise ValueError("Sequences must contain at least one element.")
+
 	return np.zeros((rows, cols), dtype=int)
 	
 
@@ -29,54 +54,36 @@ def fill_matrix(
 	"""
 	Fill the scoring matrix using the Needleman–Wunsch down-pass algorithm.
 
-	Parameters
-	----------
-	matrix : np.ndarray
-		A zero-initialized matrix of shape (len(seq2)+1, len(seq1)+1).
-		Columns correspond to sequence 1; rows correspond to sequence 2.
-	seq1_array : np.ndarray
-		NumPy array of characters representing sequence 1.
-	seq2_array : np.ndarray
-		NumPy array of characters representing sequence 2.
-	match : int, optional
-		Score for a character match (default = +1).
-	mismatch : int, optional
-		Score for a character mismatch (default = -1).
-	indel : int, optional
-		Penalty for an insertion/deletion (default = -1).
+	Args:
+		matrix (np.ndarray) : Zero-initialized matrix
+		seq1_array (np.ndarray) : NumPy array of characters representing sequence 1.
+		seq2_array (np.ndarray) : NumPy array of characters representing sequence 2.
+		match (int) : Score for a character match (default  is +1).
+		mismatch : (int) : Score for a character mismatch (default is -1).
+		indel (int) : Penalty for an insertion/deletion (default is -1).
 
-	Returns
-	-------
-	np.ndarray
-		The filled scoring matrix.
+	Returns:
+		(np.ndarray) : Scoring matrix filled via Needleman-Wunsch
 
-	Notes
-	-----
-	- The first cell (0,0) is initialized to 0.
-	- The first row and column are filled using only indel penalties.
-	- Each subsequent cell (i,j) is filled using:
-		- diagonal = matrix[i-1, j-1] + (match or mismatch)
-		- up       = matrix[i-1, j] + indel
-		- left     = matrix[i, j-1] + indel
-	  The final cell value is max(diagonal, up, left).
 	"""
 
 	rows, cols = matrix.shape
+	if matrix.shape != (len(seq2_array) + 1, len(seq1_array) + 1):
+		sys.stderr.write("Matrix shape does not match sequence lengths.")
+		raise ValueError("Matrix shape does not match sequence lengths.")
+
 
 	# Initialize the first row and first column with indel penalties
 	for i in range(1, rows):
 		matrix[i, 0] = matrix[i - 1, 0] + indel
-# 	sys.stdout.write(f"Initializing the first row with indel penalties:\n{matrix}\n")
 	for j in range(1, cols):
 		matrix[0, j] = matrix[0, j - 1] + indel
-# 	sys.stdout.write(f"Initializing the first column with indel penalties:\n{matrix}\n")
 
-	# Fill the matrix row by row
-# 	sys.stdout.write("Filling up the matrix row by row:\n")
+	# Fill the matrix
 	for i in range(1, rows):
 		for j in range(1, cols):
-			# Compare corresponding characters
-			if seq2_array[i - 1] & seq1_array[j - 1]:
+			# Assign scores based on if characters match or not
+			if seq2_array[i - 1] == seq1_array[j - 1]:
 				score_diagonal = matrix[i - 1, j - 1] + match
 			else:
 				score_diagonal = matrix[i - 1, j - 1] + mismatch
@@ -87,9 +94,7 @@ def fill_matrix(
 
 			# Take maximum
 			max_value = max(score_diagonal, score_up, score_left)
-# 			sys.stdout.write(f"Row {i}, column {j}: diagonal={score_diagonal}, up={score_up}, left={max_value} (max. = {max_value})\n")
 			matrix[i, j] = max_value
-# 			sys.stdout.write(f"{matrix}\n")
 
 	return matrix
 
@@ -102,34 +107,14 @@ def trace_matrix(
 	Trace back through the filled Needleman–Wunsch matrix to reconstruct
 	the optimal alignment path.
 
-	Parameters
-	----------
-	matrix : np.ndarray
-		The filled Needleman–Wunsch scoring matrix.
-	seq1_array : np.ndarray
-		NumPy array of characters representing sequence 1.
-	seq2_array : np.ndarray
-		NumPy array of characters representing sequence 2.
+	Args:
+		matrix (np.ndarray) : Filled Needleman–Wunsch scoring matrix.
+		seq1_array (np.ndarray) : NumPy array of characters representing sequence 1.
+		seq2_array (np.ndarray) : NumPy array of characters representing sequence 2.
 
-	Returns
-	-------
-	np.ndarray
-		A NumPy array with two rows:
-			- Row 0: aligned sequence 1
-			- Row 1: aligned sequence 2
-		Both aligned sequences have the same length.
+	Returns:
+		(np.ndarray) : A NumPy array with alignments of sequence 1 and 2:
 
-	Notes
-	-----
-	- Tracing starts from the bottom-right corner.
-	- At each step, we move in the direction that matches the cell's value:
-		* Diagonal (match/mismatch)
-		* Left  (gap in sequence 2)
-		* Up    (gap in sequence 1)
-	- When multiple paths are equally optimal:
-		1. Prefer the diagonal move.
-		2. If diagonal is not optimal, prefer the left move.
-		3. Otherwise move up.
 	"""
 	i, j = matrix.shape[0] - 1, matrix.shape[1] - 1
 	aligned_seq1 = []
@@ -154,7 +139,7 @@ def trace_matrix(
 		left = matrix[i, j - 1]
 
 		# Determine which move leads to current
-		if current == diag + 1 or current == diag - 1:
+		if current == diag + (1 if seq1_array[j - 1] == seq2_array[i - 1] else -1):
 			# Diagonal move (priority 1)
 			aligned_seq1.append(seq1_array[j - 1])
 			aligned_seq2.append(seq2_array[i - 1])

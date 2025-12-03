@@ -1,62 +1,49 @@
 #!/usr/bin/env python3
 
-import unittest
-from Bio import SeqIO
+import pytest
 import pandas as pd
-import sys
-
-def find_orfs(fasta: str) -> pd.DataFrame:
-    orf_list = []
-
-    try:
-        with open(fasta, "r") as fh:
-            for record in SeqIO.parse(fh, "fasta"):
-                orf_list.append(find_longest_orf(record.seq))
-    except FileNotFoundError:
-        sys.stderr.write("FASTA file was not found")
-        raise FileNotFoundError
-    except IOError as e:
-        sys.stderr.write(f"An IO error has occurred {e}")
-        raise IOError
-    except Exception as e:
-        sys.stderr.write(f"An error has occurred: {e}")
-        raise Exception
-    print(len(orf_list))
-    return pd.concat(orf_list, axis=1)
-
-def find_longest_orf(seq: str) -> pd.Series:
-    stop_codon = ["TAG", "TAA", "TGA"]
-    fasta_dict = {
-        "seq" : [],
-        "start" : [],
-        "end" : [],
-        "orf" : [],
-        "frame" : [],
-        "reverse" : [],
-    }
-
-    for nucleotide in [seq, seq[::-1]]:
-        for frame in range(3):
-            for i in range(frame, len(nucleotide) - 2, 3):
-                if nucleotide[i:i + 3] == "ATG":
-                    for j in range(i + 3, len(nucleotide) - 2, 3):
-                        if nucleotide[j:j + 3] in stop_codon:
-                            fasta_dict["seq"].append(nucleotide)
-                            fasta_dict["start"].append(i)
-                            fasta_dict["end"].append(j + 3)
-                            fasta_dict["orf"].append(nucleotide[i: j + 3])
-                            fasta_dict["frame"].append(frame)
-                            fasta_dict["reverse"].append(True if nucleotide != seq else False)
-                            break
-                        else:
-                            continue
-    
-    """ Sort Dictionary to grab longest ORF """
-    return pd.DataFrame(fasta_dict).sort_values(by='orf', key=lambda x: x.str.len(), ascending=False).iloc(0)
-
-class FindORFTestCase(unittest.TestCase):
-    pass
+from Bio.Seq import Seq
+from msaligner.orf import find_orfs, find_longest_orf, ORFError
 
 
-if __name__ == "__main__":
-    unittest.main()
+def test_find_longest_orf_basic():
+    seq = "AAAATGAAATAGAAA"
+    df = find_longest_orf(seq, "s1")
+    assert not df.empty
+    assert df.iloc[0]["orf"] == "ATGAAATAG"
+
+
+def test_find_longest_orf_no_orf():
+    with pytest.raises(ORFError):
+        seq = "AAAAAAAAAAAAAA"
+        df = find_longest_orf(seq, "s1")
+        assert df.empty
+
+
+def test_find_orfs_missing_file():
+    with pytest.raises(FileNotFoundError):
+        find_orfs("no_such_file.fasta")
+
+
+def test_find_orfs_reads_sequences():
+    df = find_orfs("test.fasta")
+    assert isinstance(df, pd.DataFrame)
+    assert len(df) == 3
+
+
+def test_ensure_longest_orf():
+    df_all = []
+
+    from Bio import SeqIO
+    for record in SeqIO.parse("test.fasta", "fasta"):
+        df = find_longest_orf(record.seq, record.id)
+        if not df.empty:
+            df_all.append((record.id, df))
+
+    df_final = find_orfs("test.fasta")
+
+    for seq_id, df in df_all:
+        longest_true = df.iloc[0]["orf"]
+        longest_tested = df_final[df_final["id"] == seq_id].iloc[0]["orf"]
+        assert len(longest_tested) == len(longest_true)
+
