@@ -47,7 +47,7 @@ def build_binary_tree(order: list):
 
 
 
-def get_kmers(seq : str, k : int = 4) -> list:
+def get_kmers(seq : str, k : int = 7) -> list:
     return [seq[i: i + k] for i in range(len(seq) - k + 1)]
 
 def jaccard_calculation(kmers_1 : list, kmers_2: list) -> float:

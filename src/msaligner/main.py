@@ -16,6 +16,7 @@ import argparse, sys
 from typing import List, Dict
 import matplotlib.pyplot as plt
 
+from matplotlib.colors import LinearSegmentedColormap
 from orf import find_orfs
 from kmer_ordering import dataframe_to_dict
 from kmer_ordering import order_by_kmer_similarity
@@ -91,8 +92,10 @@ class MSAligner:
 			"per_sequence": overall,
 			"global": sorted(global_counts.items(), key=lambda x: x[1], reverse=True)
 		}
-	
-	def build_kmer_matrix(self, top_k=20):
+
+
+
+	def build_kmer_matrix(self, top_k=8):
 		per_seq = self.all_kmers["per_sequence"]
 		global_sorted = self.all_kmers["global"]
 
@@ -110,16 +113,27 @@ class MSAligner:
 			row_names.append(seq_id)
 		return row_names, top_kmers, np.array(matrix)
 
-	def plot_kmer_heatmap(self, top_k=20):
+	def plot_kmer_heatmap(self, top_k=8):
 		self.row_names, self.col_names, M = self.build_kmer_matrix(top_k)
-
 		plt.figure(figsize=(12, 6))
-		plt.imshow(M, aspect='auto')
-		plt.colorbar(label='k-mer frequency')
+		
+		cmap = LinearSegmentedColormap.from_list("blue_soft-orange",["#C8A2C8", "#7a5195", "#4B0082"])
+
+		norm = plt.Normalize(vmin=0, vmax=M.max())
+		plt.imshow(M, aspect='auto', cmap=cmap, norm=norm)
+
+
+		cbar=plt.colorbar(label='k-mer frequency')
+
+	# dynamic ticks based on actual data range
+		ticks = list(range(0, int(M.max()) + 1))
+		cbar.set_ticks(ticks)
+		cbar.set_ticklabels([str(t) for t in ticks])
+
+		
 
 		plt.xticks(range(len(self.col_names)), self.col_names, rotation=90)
 		plt.yticks(range(len(self.row_names)), self.row_names)
-
 		plt.title(f"Top {top_k} k-mer Frequency Heatmap")
 		plt.tight_layout()
 		plt.show()
