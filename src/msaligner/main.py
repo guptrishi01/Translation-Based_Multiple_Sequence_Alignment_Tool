@@ -27,6 +27,7 @@ import os
 from typing import List, Dict
 import matplotlib.pyplot as plt
 
+from matplotlib.colors import LinearSegmentedColormap
 from orf import find_orfs
 from kmer_ordering import dataframe_to_dict
 from kmer_ordering import order_by_kmer_similarity
