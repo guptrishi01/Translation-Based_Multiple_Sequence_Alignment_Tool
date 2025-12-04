@@ -153,8 +153,8 @@ final-project-Rishi_Gupta/
 │   └── codon_variability.png  
 │  
 └── docs/  
-    ├── Project Flowchart
-    ├── Project Pseudocode
+    ├── projectFlowchart
+    ├── projectPseudocode
     └── projectSummary
 
 ---
