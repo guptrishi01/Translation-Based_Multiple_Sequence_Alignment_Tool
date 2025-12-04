@@ -441,11 +441,8 @@ def main():
 	generate codon position statistics and visualizations.
 	"""
 	args = parse_args()
-	FASTA = PROJECT_ROOT / "data" / args.input
-	print(FASTA)
-	print(args.input)
 	msaligner = MSAligner(
-		fasta_file=FASTA,
+		fasta_file=args.input,
 		aln_file=args.output,
 		ref=args.reference,
 		match=args.match,
