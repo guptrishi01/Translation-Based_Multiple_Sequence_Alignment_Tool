@@ -6,7 +6,7 @@
 
 ---
 
-## Table of Contents
+## README Contents
 - Project Overview
 - AI Usage Statement
 - Installation Instructions
@@ -142,12 +142,10 @@ final-project-Rishi_Gupta/
 │   ├── align_test.py  
 │   ├── orf_test.py  
 │   ├── kmer_test.py
-│   └── test_file.fasta   
+│   └── input_file.fasta   
 │  
-├── data/  
-│   └── fly_dna1.fasta 
 │  
-├── results/  
+├── results/  (Created after running main.py)
 │   ├── aligned_proteins.fasta  
 │   ├── aligned_codons.fasta  
 │   ├── codon_stats.csv
