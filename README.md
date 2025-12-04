@@ -37,6 +37,7 @@ I used AI (ChatGPT) **as an assistant, not a code generator**. I used ChatGPT in
 - Debugging
 - Clarifying biological concepts
 - Suggesting methods to increase code efficiency
+- Assisting in writing functions for ordering sequences and back translation
 
 **No code was copied verbatim.** All final implementations were manually written, tested, and adapted for the project’s requirements.
 
@@ -149,7 +150,8 @@ final-project-Rishi_Gupta/
 ├── results/  
 │   ├── aligned_proteins.fasta  
 │   ├── aligned_codons.fasta  
-│   ├── codon_stats.csv  
+│   ├── codon_stats.csv
+│   ├── alignment_stats.csv  
 │   └── codon_variability.png  
 │  
 └── docs/  

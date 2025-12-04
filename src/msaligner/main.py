@@ -49,7 +49,7 @@ def parse_args() -> argparse.Namespace:
 	)
 	parser.add_argument(
 		"-i", "--input",
-		default="fly_dna1.fasta",
+		default="input_file.fasta",
 		help="Path to input FASTA file."
 	)
 	parser.add_argument(
