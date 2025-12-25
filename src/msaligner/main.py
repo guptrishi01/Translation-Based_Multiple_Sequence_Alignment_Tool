@@ -392,47 +392,105 @@ class MSAligner:
 		plt.close()
 
 	
+	def _tree_root(self):
+		"""Return the root node identifier for the guide tree."""
+		if not self.nodes:
+			# No internal nodes: only one terminal
+			return list(self.terminals.values())[0]
+		return max(self.nodes.keys())
+
+	def format_guide_tree_newick(self) -> str:
+		"""
+		Return a Newick-like string representation of the guide tree.
+		Leaves are sequence IDs. Internal nodes are labeled N<id>.
+		"""
+		def rec(node) -> str:
+			# Leaves are sequence labels (strings)
+			if isinstance(node, str):
+				return node
+			# Internal nodes are ints pointing into self.nodes
+			if isinstance(node, int) and node in self.nodes:
+				left, right = self.nodes[node]
+				return f"({rec(left)},{rec(right)})N{node}"
+			# Fallback (shouldn't happen if the tree is consistent)
+			return str(node)
+
+		root = self._tree_root()
+		return rec(root) + ";"
+
+	def print_guide_tree(self) -> None:
+		"""
+		Print ordering + terminals + internal nodes + Newick-like tree to stdout.
+		Call this BEFORE alignment output.
+		"""
+		sys.stdout.write("Guide Tree (k-mer similarity progressive tree)\n")
+		sys.stdout.write(f"Ordering: {self.order}\n\n")
+
+		sys.stdout.write("Terminal nodes (id -> sequence):\n")
+		for tid in sorted(self.terminals.keys()):
+			sys.stdout.write(f"  {tid}: {self.terminals[tid]}\n")
+
+		sys.stdout.write("\nInternal nodes (node_id -> [left, right]):\n")
+		for nid in sorted(self.nodes.keys()):
+			sys.stdout.write(f"  N{nid}: {self.nodes[nid]}\n")
+
+		sys.stdout.write("\nNewick-like representation:\n")
+		sys.stdout.write(self.format_guide_tree_newick() + "\n\n")
+
 
 	def write_fa(self) -> None:
 		"""
-		Write final aligned amino-acid and DNA sequences to FASTA format
+		Write final aligned amino-acid and DNA codon-aligned sequences to FASTA format,
+		and print them to stdout in two separate sections (AA first, then codon).
 		"""
 		dna_path = os.path.join(OUTPUT_DIR, "dna_codon_alignment.fasta")
 		aa_path = os.path.join(OUTPUT_DIR, self.out)
 
-
-		# Grab Sequence IDs and Alignments
+		# Grab Sequence IDs and Alignments (terminals only)
 		seqids = [self.terminals[key] for key in self.terminals]
-		seqs = [''.join(next(iter(s)) for s in self.sequences[seqid]) for seqid in seqids]
+		aa_seqs = [''.join(next(iter(s)) for s in self.sequences[seqid]) for seqid in seqids]
 
-		if len(seqids) != len(seqs):
+		if len(seqids) != len(aa_seqs):
 			raise ValueError("IDs and sequences must have the same length.")
-		
+
+		# Clean AA sequences once
+		aa_clean = {sid: seq.strip().upper() for sid, seq in zip(seqids, aa_seqs)}
+
+		# --------------------------
+		# 1) Write AA alignment file
+		# --------------------------
 		with open(aa_path, "w", encoding="utf-8") as f:
-			for seq_id, seq in zip(seqids, seqs):
-				clean_seq = seq.strip().upper()
-				f.write(f">{seq_id}\n{clean_seq}\n")
-		sys.stdout.write(f"Amino Acid Alignment saved into {self.out}\n//\n")
+			for sid in seqids:
+				f.write(f">{sid}\n{aa_clean[sid]}\n")
 
-		sys.stdout.write("DNA Codon Alignment:\n")
+		# --------------------------
+		# 2) Print AA alignment section
+		# --------------------------
+		sys.stdout.write("Amino Acid Alignment\n")
+		for sid in seqids:
+			sys.stdout.write(f">{sid}\n{aa_clean[sid]}\n")
 
+		sys.stdout.write(f"\nAlignment saved as {aa_path}\n\n\n")
+
+		# -----------------------------------
+		# 3) Write Codon alignment file (only codon records)
+		# -----------------------------------
 		with open(dna_path, "w", encoding="utf-8") as f:
-			for seq_id, aa_seq in zip(seqids, seqs):
+			for sid in seqids:
+				codon_seq = self.codon_alignment.get(sid, "").strip().upper()
+				f.write(f">{sid}_codon\n{codon_seq}\n")
 
-				# amino-acid block
-				clean_aa = aa_seq.strip().upper()
-				f.write(f">{seq_id}\n{clean_aa}\n")
-				sys.stdout.write(f">{seq_id}\n{clean_aa}\n")
+		# -----------------------------------
+		# 4) Print Codon alignment section
+		# -----------------------------------
+		sys.stdout.write("Codon Alignment\n")
+		for sid in seqids:
+			codon_seq = self.codon_alignment.get(sid, "").strip().upper()
+			sys.stdout.write(f">{sid}_codon\n{codon_seq}\n")
 
-				# codon-aligned block
-				codon_seq = self.codon_alignment.get(seq_id, "")
-				codon_seq = codon_seq.strip().upper()
+		sys.stdout.write(f"\nAlignment saved as {dna_path}\n//\n")
 
-				f.write(f">{seq_id}_codon\n{codon_seq}\n")
-				sys.stdout.write(f">{seq_id}_codon\n{codon_seq}\n")
-
-		sys.stdout.write(f"Alignment saved into dna_codon_alignment.fasta\n//\n")
-
+	
 
 def main():
 	"""
@@ -454,6 +512,7 @@ def main():
 	history: List[str] = []
 	msaligner.detect_orfs()
 	msaligner.find_kmer_translate()
+	msaligner.print_guide_tree()
 
 	# Sequentially align pairs according to the progressive tree
 	for internal_node in msaligner.nodes:
