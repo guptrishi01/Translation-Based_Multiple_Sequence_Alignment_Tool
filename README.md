@@ -1,4 +1,3 @@
-@ -1,153 +1,151 @@
 # Multiple Sequence Alignment Pipeline  
 ### **Final Project – Programming II**  
 **Author:** Rishi Gupta  
