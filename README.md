@@ -8,7 +8,6 @@
 ---
 
 ## Table of Contents
-## README Contents
 - Project Overview
 - AI Usage Statement
 - Installation Instructions
