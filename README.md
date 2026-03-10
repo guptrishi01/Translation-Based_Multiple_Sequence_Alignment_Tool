@@ -47,9 +47,10 @@ I used AI (ChatGPT) **as an assistant, not a code generator**. I used ChatGPT in
 
 ## Installation
 Clone the repository:
+https://github.com/guptrishi01/Translation-Based-Multiple-Sequence-Alignment-Tool.git
 ```bash
-git clone https://github.com/guptrishi01/final-project-Rishi_Gupta.git
-cd final-project_Rishi_Gupta/src/msaligner
+git clone https://github.com/guptrishi01/Translation-Based-Multiple-Sequence-Alignment-Tool.git
+cd Translation-Based-Multiple-Sequence-Alignment-Tool
 ```
 
 Create conda environment
@@ -62,13 +63,13 @@ conda activate bioinfo_env
 ## Usage
 
 ```bash
-python3 main.py <options>
+python3 src/main.py <options>
 ```
 
 To see the available options:
 
 ```bash
-python3 main.py -h
+python3 src/main.py -h
 ```
 
 Options/Arguments:
