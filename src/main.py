@@ -17,7 +17,7 @@ Workflow is encapsulated in the MSAligner class, which manages:
 	- Output Writing and Visualizations
 
 Author: Rishi Gupta
-Contact: rgupta25@charlotte.edu
+Contact: guptrishi01@gmail.com
 """
 
 import pandas as pd
@@ -37,9 +37,10 @@ from needleman_wunsch import fill_matrix
 from needleman_wunsch import trace_matrix
 
 # Project Root and Output Directory Path
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_DIR = "results"
-os.makedirs(OUTPUT_DIR, exist_ok=True)
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+OUTPUT_DIR = PROJECT_ROOT / "results"
+DATA_DIR = PROJECT_ROOT / "data"
+OUTPUT_DIR.mkdir(exist_ok=True)
 
 
 def parse_args() -> argparse.Namespace:
@@ -88,8 +89,8 @@ class MSAligner:
 			ttable (int) : NCBI translation table to use for ORF translation.
 			ksize (int) : K-mer size used for similarity ordering and guide-tree construction.
         """
-		self.fasta = fasta_file
-		self.out = aln_file
+		self.fasta = Path(fasta_file)
+		self.out = Path(aln_file)
 		self.reference = ref
 		self.match = match
 		self.mismatch = mismatch
@@ -103,7 +104,10 @@ class MSAligner:
 		Detect open reading frames in input FASTA
 
 		"""
-		self.df = find_orfs(self.fasta, self.table)
+
+		if not self.fasta.exists():
+			raise FileNotFoundError(f"FASTA file not found: {self.fasta}")
+		self.df = find_orfs(str(self.fasta), self.table)
 
 	def find_kmer_translate(self):
 		"""
@@ -308,7 +312,7 @@ class MSAligner:
 		df["mutation_rate"] = df["mismatches"] / df["total"]
 
 		self.codon_stats_df = df
-		csv_path = os.path.join(OUTPUT_DIR, "codon_position_stats.csv")
+		csv_path = OUTPUT_DIR / "codon_position_stats.csv"
 		df.to_csv(csv_path, index=False)
 		sys.stdout.write("Saved codon_position_stats.csv")
 
@@ -368,7 +372,7 @@ class MSAligner:
 		self.avg_indel    = sum(indel_counts) / (n_positions * n_seqs)
 
 		# Save results
-		out_csv = os.path.join(OUTPUT_DIR, "alignment_stats.csv")
+		out_csv = OUTPUT_DIR / "alignment_stats.csv"
 		df.to_csv(out_csv, index=False)
 
 		return df, self.avg_mismatch, self.avg_indel
@@ -386,7 +390,7 @@ class MSAligner:
 		plt.legend()
 		plt.tight_layout()
 
-		out_png = os.path.join(OUTPUT_DIR, "alignment_mutation_rates.png")
+		out_png = OUTPUT_DIR / "alignment_mutation_rates.png"
 		plt.savefig(out_png, dpi=140)
 		plt.show()
 		plt.close()
@@ -443,8 +447,8 @@ class MSAligner:
 		Write final aligned amino-acid and DNA codon-aligned sequences to FASTA format,
 		and print them to stdout in two separate sections (AA first, then codon).
 		"""
-		dna_path = os.path.join(OUTPUT_DIR, "dna_codon_alignment.fasta")
-		aa_path = os.path.join(OUTPUT_DIR, self.out)
+		dna_path = OUTPUT_DIR / "dna_codon_alignment.fasta"
+		aa_path = self.out
 
 		# Grab Sequence IDs and Alignments (terminals only)
 		seqids = [self.terminals[key] for key in self.terminals]
@@ -499,9 +503,23 @@ def main():
 	generate codon position statistics and visualizations.
 	"""
 	args = parse_args()
+
+	# Resolve input path
+	input_path = Path(args.input)
+
+	if not input_path.is_absolute():
+		input_path = DATA_DIR / input_path
+	
+	if not input_path.exists():
+		raise FileNotFoundError(f"Input FASTA not found: {input_path}")
+	
+	# Resolve output path
+	output_path = OUTPUT_DIR / args.output
+
+	# Create class
 	msaligner = MSAligner(
-		fasta_file=args.input,
-		aln_file=args.output,
+		fasta_file=input_path,
+		aln_file=output_path,
 		ref=args.reference,
 		match=args.match,
 		mismatch=args.mismatch,
@@ -509,6 +527,8 @@ def main():
 		ttable=args.table,
 		ksize=args.kmer
 	)
+
+	# Utilize class functions
 	history: List[str] = []
 	msaligner.detect_orfs()
 	msaligner.find_kmer_translate()
