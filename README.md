@@ -6,18 +6,6 @@
 
 ---
 
-## Table of Contents
-- Project Overview
-- AI Usage Statement
-- Installation Instructions
-- Usage Examples
-- Input & Output Formats
-- Repository Structure
-- Limitations & Assumptions
-- License
-
----
-
 ### Project Overview
 This project is a **Translation-Based Multiple Sequence Aligner (MSA)** pipeline written in Python. 
 It aligns nucleotides by translating them into amino acids, pairwise aligning at the protein level, 
