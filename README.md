@@ -1,146 +1,206 @@
-# Multiple Sequence Alignment Pipeline  
-### **Final Project – Programming II**  
-**Author:** Rishi Gupta  
-**Email:** guptrishi01@gmail.com  
-**License:** GPL-2.0  
+# Translation-Based Multiple Sequence Alignment Tool
+
+> A Python command-line pipeline that aligns nucleotide sequences at the **protein level** — detecting ORFs, translating to amino acids, pairwise aligning with Needleman-Wunsch, and back-translating to codon-aware DNA alignments. Built from scratch as a final project for Programming II at UNC Charlotte.
+
+[![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white)]()
+[![Biopython](https://img.shields.io/badge/Biopython-1.80%2B-006400)]()
+[![pytest](https://img.shields.io/badge/tested%20with-pytest-0A9EDC)]()
+[![License](https://img.shields.io/badge/License-GPL--3.0-blue)]()
+
+**Author:** Rishi Gupta · [guptrishi01@gmail.com](mailto:guptrishi01@gmail.com)
 
 ---
 
-### Project Overview
-This project is a **Translation-Based Multiple Sequence Aligner (MSA)** pipeline written in Python. 
-It aligns nucleotides by translating them into amino acids, pairwise aligning at the protein level, 
-and then back-translating to codon-aware nucleotide alignments.
-
-The pipeline includes these functionalities:
-1. **ORF Detection** - Identify open reading frames (ORFs) in nucleotide sequences.  
-2. **Translation** – Convert nucleotide sequences into amino acids.  
-3. **k-mer Similarity & Sorting** – Sort amino acid sequences for progressive alignment 
-4. **Pairwise Alignment** – Utilize the Needleman-Wunsch algorithm for pairwise alignment
-5. **Back-Translation** – Convert aligned amino acids into codon-aware nucleotide alignments.  
-6. **Codon Statistics & Visualization** – Generate CSV summaries and plots of codon position variability.
+## Table of Contents
+- [Why Translation-Based Alignment?](#why-translation-based-alignment)
+- [Pipeline](#pipeline)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Input / Output](#input--output)
+- [Project Structure](#project-structure)
+- [Testing](#testing)
+- [AI Usage Statement](#ai-usage-statement)
 
 ---
 
-## AI Usage Statement
-I used AI (ChatGPT) **as an assistant, not a code generator**. I used ChatGPT in these ways:
+## Why Translation-Based Alignment?
 
-- Debugging
-- Clarifying biological concepts
-- Suggesting methods to increase code efficiency
-- Assisting in writing functions for ordering sequences and back translation
+Direct nucleotide alignment ignores the fact that coding sequences evolve under selective pressure at the protein level. Aligning amino acids first respects that biology:
 
-**No code was copied verbatim.** All final implementations were manually written, tested, and adapted for the project’s requirements.
+- **Synonymous substitutions don't disrupt alignment.** Two codons encoding the same amino acid collapse to a match in protein space.
+- **Frame-shift indels are impossible by construction.** Any gap introduced at the protein level becomes a clean 3-nucleotide gap in DNA space.
+- **Conserved regions become visible.** Protein-level conservation is often the signal of biological importance.
+
+This project reimplements the classical Needleman-Wunsch algorithm from first principles while respecting that biological reality.
+
+---
+
+## Pipeline
+
+```
+┌──────────────────┐
+│  1. Input FASTA  │  Nucleotide sequences
+└────────┬─────────┘
+         ▼
+┌──────────────────┐
+│  2. ORF Detection│  Scan all 6 reading frames
+└────────┬─────────┘
+         ▼
+┌──────────────────┐
+│  3. Translation  │  Nucleotides → amino acids
+└────────┬─────────┘
+         ▼
+┌──────────────────┐
+│  4. K-mer Sort   │  Order sequences for progressive alignment
+└────────┬─────────┘
+         ▼
+┌──────────────────┐
+│  5. Pairwise N-W │  Needleman-Wunsch on amino acids
+└────────┬─────────┘
+         ▼
+┌──────────────────┐
+│ 6. Back-Translate│  Aligned AAs → codon-aware DNA
+└────────┬─────────┘
+         ▼
+┌──────────────────┐
+│  7. Variability  │  Per-codon mismatch/indel rates
+│     Analysis     │  CSV + plots
+└──────────────────┘
+```
 
 ---
 
 ## Installation
-Clone the repository:
-https://github.com/guptrishi01/Translation-Based-Multiple-Sequence-Alignment-Tool.git
-```bash
-git clone https://github.com/guptrishi01/Translation-Based-Multiple-Sequence-Alignment-Tool.git
-cd Translation-Based-Multiple-Sequence-Alignment-Tool
-```
 
-Create conda environment
 ```bash
-conda create --name bioinfo_env pandas numpy biopython matplotlib pytest
+git clone https://github.com/guptrishi01/Translation-Based_Multiple_Sequence_Alignment_Tool.git
+cd Translation-Based_Multiple_Sequence_Alignment_Tool
+
+conda create -n bioinfo_env pandas numpy biopython matplotlib pytest -y
 conda activate bioinfo_env
 ```
+
 ---
 
 ## Usage
 
 ```bash
-python3 src/main.py <options>
+python3 src/main.py [OPTIONS]
 ```
 
-To see the available options:
+### Options
+
+| Flag | Description |
+|------|-------------|
+| `-h`, `--help` | Show help message |
+| `-i`, `--input` | Path to input FASTA file |
+| `-o`, `--output` | Path to output FASTA alignment |
+| `-r`, `--reference` | Sequence ID to use as reference for mutation-rate analysis |
+| `-ma`, `--match` | Score for a match |
+| `-mi`, `--mismatch` | Penalty for a mismatch |
+| `-in`, `--indel` | Penalty for an insertion/deletion |
+| `-t`, `--table` | Translation table (e.g., 1 for standard, 2 for vertebrate mitochondrial) |
+| `-k`, `--kmer` | K-mer size for similarity ordering |
+
+### Example
 
 ```bash
-python3 src/main.py -h
+python3 src/main.py \
+    -i data/fly_dna1.fasta \
+    -o results/aligned.fasta \
+    -ma 1 -mi -1 -in -2 \
+    -t 1 -k 3
 ```
-
-Options/Arguments:
-- -h, --help (Help message)
-- -i, --input (Path to input FASTA file)
-- -o, --output (Path to output FASTA alignment file)
-- -r, --reference (Sequence ID to use as a reference for mutation-rate analysis)
-- -ma, -match (Score for a match)
-- -mi, -mismatch (Penalty for a mismatch)
-- -in, -indel (Penalty for an insertion/deletion)
-- -t, -table (Translation table)
-- -k, -kmer (K-mer size)
 
 ---
 
+## Input / Output
 
-## Input & Output Formats
-### Input FASTA format
-a) Must contain nucleotide sequences  
-b) ORFs must exist in at least one frame  
+### Input FASTA
+- Must contain nucleotide sequences
+- ORFs must exist in at least one reading frame
 
-Example:
-```fasta
+```
 >seq1
 ATGACCTTGAATG...
 >seq2
 ATGGGCTTTAG...
 ```
 
-### Output Files
-#### 1. Amino Acid Alignment
-`results/aligned_amino_acids.fasta`
+### Output files
 
-#### 2. DNA Codon Alignment
-`results/dna_codon_alignment.fasta`
+| File | Contents |
+|------|----------|
+| `results/aligned_amino_acids.fasta` | Amino acid alignment |
+| `results/dna_codon_alignment.fasta` | Codon-aware DNA alignment |
+| `results/codon_positions.csv` | Per-codon-position mismatch/mutation rate |
+| `results/alignment_stats.csv` | Per-position mismatch and indel rates |
+| `results/alignment_mutation_rates.png` | Variability visualization plot |
 
-#### 3. Codon Statistics
-`results/codon_positions.csv` – Columns:
-- codon_position
-- mismatches
-- total
-- mutation_rate
+### `codon_positions.csv` columns
+`codon_position`, `mismatches`, `total`, `mutation_rate`
 
-`results/alignment_stats.csv` – Columns:
-- Position
-- MismatchRate
-- IndelRate
-
-
-#### 4. Codon Variability Plot
-`results/alignment_mutation_rates.png` 
-- Visualizes mismatch and indel rates across alignment
+### `alignment_stats.csv` columns
+`Position`, `MismatchRate`, `IndelRate`
 
 ---
 
-### Project Repository Structure
-final-project-Rishi_Gupta/  
-├── README.md  
-├── LICENSE   
-│  
-├── src/  
-│   └── msaligner/  
-│       ├── __init__.py  
-│       ├── back_translate.py  
-│       ├── kmer_ordering.py  
-│       ├── orf.py  
-│       ├── needleman_wunsch.py  
-|       └── main.py
-│  
-├── tests/  
-│   ├── __init__.py  
-│   ├── conftest.py  
-│   ├── align_test.py  
-│   ├── orf_test.py  
+## Project Structure
+
+```
+Translation-Based_Multiple_Sequence_Alignment_Tool/
+├── README.md
+├── LICENSE
+├── src/
+│   └── msaligner/
+│       ├── __init__.py
+│       ├── orf.py                   # ORF detection in 6 frames
+│       ├── kmer_ordering.py         # K-mer similarity + ordering
+│       ├── needleman_wunsch.py      # Pairwise alignment
+│       ├── back_translate.py        # Codon-aware back-translation
+│       └── main.py                  # CLI entry point
+├── tests/
+│   ├── __init__.py
+│   ├── conftest.py
+│   ├── orf_test.py
 │   ├── kmer_test.py
-│   └── test_file.fasta   
-│   └── input_file.fasta   
-│  
-├── data/  
-│   └── fly_dna1.fasta 
-│  
-├── results/  
-├── results/  (Created after running main.py)
-│   ├── aligned_proteins.fasta  
-│   ├── aligned_codons.fasta  
-│   ├── codon_stats.csv
+│   ├── align_test.py
+│   ├── test_file.fasta
+│   └── input_file.fasta
+├── data/
+│   └── fly_dna1.fasta
+├── docs/
+└── results/                         # Created on first run
+```
+
+---
+
+## Testing
+
+```bash
+pytest tests/ -v
+```
+
+Unit tests cover:
+- ORF detection (known-ORF inputs, sequences with no ORF, frame edge cases)
+- K-mer ordering (symmetry, correct pair identification)
+- Alignment correctness (known-alignment fixtures)
+
+---
+
+## AI Usage Statement
+
+I used AI (ChatGPT) **as an assistant, not a code generator.** AI helped with:
+
+- Debugging
+- Clarifying biological concepts
+- Suggesting efficiency improvements
+- Reviewing functions for ordering sequences and back-translation
+
+**No code was copied verbatim.** All final implementations were manually written, tested, and adapted for the project's requirements.
+
+---
+
+## License
+
+GPL-3.0 — see [LICENSE](LICENSE).
